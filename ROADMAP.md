@@ -8,7 +8,7 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 
 ## Backlog
 - [x] Project layout, line protocol parser, simulated serial reader, DHT22 sketch
-- [ ] CLI `iotlab-read` to print readings from a port or `--simulate`
+- [x] CLI `iotlab-read` to print readings from a port or `--simulate`
 - [ ] CSV logger with rotation and a reader to load logs back
 - [ ] Sketch: BMP280 pressure/temperature driver with the same protocol
 - [ ] Sketch: LDR + PIR sensor sketch with threshold helpers
@@ -29,4 +29,5 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 - [ ] Docker compose: Mosquitto + bridge + dashboard
 
 ## Changelog
+- 2026-11-04: `iotlab-read` CLI (`--port`/`--simulate`, table/json/csv output, `--count`, corruption stats), 8 tests.
 - 2026-10-28: Initial layout, `iotlab.parser` (checksummed `key=value` frames), `SerialReader`/`SimulatedSerial`, DHT22 sketch, pytest suite.

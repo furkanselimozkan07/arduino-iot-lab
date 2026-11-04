@@ -10,6 +10,8 @@ parsing, MQTT publishing and a Streamlit live dashboard (planned, see
 - `iotlab.SerialReader` – iterates valid readings from any `readline()` source and counts bad lines.
 - `iotlab.SimulatedSerial` – fake port (sine wave + noise, optional corruption) so everything works without hardware.
 
+- `iotlab-read` – CLI printing readings from a port or the simulator as table, JSON lines or CSV.
+
 ## Install & test
 ```bash
 pip install -e . pytest
@@ -17,6 +19,11 @@ pytest
 ```
 
 ## Usage
+```bash
+iotlab-read --simulate --count 5                 # no hardware needed
+iotlab-read --port /dev/ttyACM0 --format json   # real board
+```
+
 ```python
 from iotlab import SerialReader, SimulatedSerial
 

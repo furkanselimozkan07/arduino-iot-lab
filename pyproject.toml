@@ -11,6 +11,9 @@ requires-python = ">=3.9"
 license = { text = "MIT" }
 dependencies = ["pyserial>=3.5"]
 
+[project.scripts]
+iotlab-read = "iotlab.cli:run"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
