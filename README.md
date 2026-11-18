@@ -11,6 +11,7 @@ parsing, MQTT publishing and a Streamlit live dashboard (planned, see
 - `iotlab.SimulatedSerial` – fake port (sine wave + noise, optional corruption) so everything works without hardware.
 
 - `iotlab-read` – CLI printing readings from a port or the simulator as table, JSON lines or CSV.
+- `iotlab.CsvLogger` – rotating CSV logs (`readings-0001.csv`, ...; each file has its own header, resumes on restart) and `read_log`/`read_logs` to load them back as `Reading`s.
 
 ## Install & test
 ```bash
@@ -22,6 +23,7 @@ pytest
 ```bash
 iotlab-read --simulate --count 5                 # no hardware needed
 iotlab-read --port /dev/ttyACM0 --format json   # real board
+iotlab-read --simulate --count 100 --log-dir logs --max-log-bytes 2000   # rotating CSV log
 ```
 
 ```python
@@ -29,6 +31,9 @@ from iotlab import SerialReader, SimulatedSerial
 
 for reading in SerialReader(SimulatedSerial(count=3)):
     print(reading.timestamp_ms, reading.values)
+
+from iotlab import read_logs
+print(len(read_logs("logs")), "readings loaded from logs/")
 
 # real hardware:
 # reader = SerialReader.open("/dev/ttyACM0", 9600)

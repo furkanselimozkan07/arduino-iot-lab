@@ -13,6 +13,7 @@ import json
 import sys
 from typing import List, Optional, Sequence, TextIO
 
+from .logger import CsvLogger
 from .parser import Reading
 from .serial_source import LineSource, SerialReader, SimulatedSerial
 
@@ -46,6 +47,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--interval-ms", type=int, default=2000, help="simulated sample interval")
     p.add_argument("--corrupt-every", type=int, default=0, help="simulate a corrupted line every N lines")
     p.add_argument("--seed", type=int, default=0, help="simulator random seed")
+    p.add_argument("--log-dir", help="also append readings to rotating CSV files in this directory")
+    p.add_argument("--log-prefix", default="readings", help="log file prefix (default 'readings')")
+    p.add_argument("--max-log-bytes", type=int, default=1_000_000, help="rotate log files at this size")
     return p
 
 
@@ -73,6 +77,13 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
                 return 1
 
     reader = SerialReader(source)
+    logger = None
+    if args.log_dir:
+        try:
+            logger = CsvLogger(args.log_dir, args.log_prefix, args.max_log_bytes)
+        except (ValueError, OSError) as exc:
+            print(f"error: cannot start logging: {exc}", file=sys.stderr)
+            return 2
     printed = 0
     columns: List[str] = []
     writer_header_done = False
@@ -84,11 +95,16 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
                 print(",".join(["ms"] + columns), file=out)
                 writer_header_done = True
             print(format_reading(reading, args.fmt, columns), file=out)
+            if logger:
+                logger.write(reading)
             printed += 1
             if args.count is not None and printed >= args.count:
                 break
     except KeyboardInterrupt:
         pass
+    finally:
+        if logger:
+            logger.close()
     print(f"# {reader.good} valid, {reader.bad} corrupted lines", file=sys.stderr)
     return 0
 
