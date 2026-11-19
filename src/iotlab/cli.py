@@ -13,6 +13,7 @@ import json
 import sys
 from typing import List, Optional, Sequence, TextIO
 
+from .filters import Ema, HampelFilter, MovingAverage, ReadingFilter
 from .logger import CsvLogger
 from .parser import Reading
 from .serial_source import LineSource, SerialReader, SimulatedSerial
@@ -50,7 +51,22 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--log-dir", help="also append readings to rotating CSV files in this directory")
     p.add_argument("--log-prefix", default="readings", help="log file prefix (default 'readings')")
     p.add_argument("--max-log-bytes", type=int, default=1_000_000, help="rotate log files at this size")
+    p.add_argument("--smooth", type=int, default=0, metavar="N", help="moving average over N samples")
+    p.add_argument("--ema", type=float, default=0.0, metavar="ALPHA", help="exponential smoothing factor (0 < ALPHA <= 1)")
+    p.add_argument("--reject-outliers", action="store_true", help="replace spikes by the window median (Hampel filter)")
     return p
+
+
+def build_filters(args: argparse.Namespace) -> List[ReadingFilter]:
+    """Filter chain requested on the command line (outliers first, then smoothing)."""
+    chain: List[ReadingFilter] = []
+    if args.reject_outliers:
+        chain.append(ReadingFilter(HampelFilter))
+    if args.smooth:
+        chain.append(ReadingFilter(lambda: MovingAverage(args.smooth)))
+    if args.ema:
+        chain.append(ReadingFilter(lambda: Ema(args.ema)))
+    return chain
 
 
 def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
@@ -61,6 +77,13 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
     if args.count is not None and args.count < 1:
         print("error: --count must be >= 1", file=sys.stderr)
         return 2
+    if args.smooth < 0 or not 0 <= args.ema <= 1:
+        print("error: --smooth must be >= 0 and --ema within 0..1", file=sys.stderr)
+        return 2
+    if args.smooth and args.ema:
+        print("error: use either --smooth or --ema, not both", file=sys.stderr)
+        return 2
+    filters = build_filters(args)
 
     if source is None:
         if args.simulate:
@@ -89,6 +112,8 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
     writer_header_done = False
     try:
         for reading in reader:
+            for f in filters:
+                reading = f.apply(reading)
             if not columns:
                 columns = sorted(reading.values)
             if args.fmt == "csv" and not writer_header_done:

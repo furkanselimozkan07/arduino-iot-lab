@@ -12,6 +12,7 @@ parsing, MQTT publishing and a Streamlit live dashboard (planned, see
 
 - `iotlab-read` – CLI printing readings from a port or the simulator as table, JSON lines or CSV.
 - `iotlab.CsvLogger` – rotating CSV logs (`readings-0001.csv`, ...; each file has its own header, resumes on restart) and `read_log`/`read_logs` to load them back as `Reading`s.
+- `iotlab.filters` – streaming `MovingAverage`, `Ema` and `HampelFilter` (median/MAD outlier replacement), applied per sensor key with `ReadingFilter`.
 
 ## Install & test
 ```bash
@@ -24,6 +25,7 @@ pytest
 iotlab-read --simulate --count 5                 # no hardware needed
 iotlab-read --port /dev/ttyACM0 --format json   # real board
 iotlab-read --simulate --count 100 --log-dir logs --max-log-bytes 2000   # rotating CSV log
+iotlab-read --simulate --count 50 --reject-outliers --smooth 5   # despike, then average
 ```
 
 ```python
