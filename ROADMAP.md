@@ -15,7 +15,7 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 - [ ] Auto-detect serial port (list ports, pick Arduino by VID/PID)
 - [ ] Reconnect logic for unplugged boards (backoff, tested with fake port)
 - [x] Moving average / outlier filter module
-- [ ] MQTT publisher (paho-mqtt) with injectable client and tests
+- [x] MQTT publisher (paho-mqtt) with injectable client and tests
 - [ ] Config file (TOML) for port, topics and sensors
 - [ ] Bridge: serial -> MQTT command `iotlab-bridge`
 - [ ] Streamlit dashboard: live line charts from simulated source
@@ -29,6 +29,7 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 - [ ] Docker compose: Mosquitto + bridge + dashboard
 
 ## Changelog
+- 2026-11-20: `iotlab.mqtt` (`MqttConfig`, `MqttPublisher` with injectable client, JSON + per-key topics, retained status, lazy paho client), optional `mqtt` extra, 9 tests.
 - 2026-11-19: `iotlab.filters` (`MovingAverage`, `Ema`, `HampelFilter`, `ReadingFilter`), `iotlab-read --smooth/--ema/--reject-outliers`, 11 tests.
 - 2026-11-18: `iotlab.logger` (`CsvLogger` size-based rotation, resume, `read_log`/`read_logs`), `iotlab-read --log-dir/--log-prefix/--max-log-bytes`, 9 tests.
 - 2026-11-04: `iotlab-read` CLI (`--port`/`--simulate`, table/json/csv output, `--count`, corruption stats), 8 tests.
