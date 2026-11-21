@@ -13,6 +13,7 @@ import json
 import sys
 from typing import List, Optional, Sequence, TextIO
 
+from .alerts import AlertEngine
 from .filters import Ema, HampelFilter, MovingAverage, ReadingFilter
 from .logger import CsvLogger
 from .parser import Reading
@@ -54,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--smooth", type=int, default=0, metavar="N", help="moving average over N samples")
     p.add_argument("--ema", type=float, default=0.0, metavar="ALPHA", help="exponential smoothing factor (0 < ALPHA <= 1)")
     p.add_argument("--reject-outliers", action="store_true", help="replace spikes by the window median (Hampel filter)")
+    p.add_argument("--alert", action="append", default=[], metavar="RULE",
+                   help="alert rule such as 'temp_c>30 for 3 clear 28' (repeatable); events go to stderr")
     return p
 
 
@@ -84,6 +87,11 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
         print("error: use either --smooth or --ema, not both", file=sys.stderr)
         return 2
     filters = build_filters(args)
+    try:
+        alerts = AlertEngine.from_strings(args.alert)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     if source is None:
         if args.simulate:
@@ -120,6 +128,8 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
                 print(",".join(["ms"] + columns), file=out)
                 writer_header_done = True
             print(format_reading(reading, args.fmt, columns), file=out)
+            for event in alerts.update(reading):
+                print(event, file=sys.stderr)
             if logger:
                 logger.write(reading)
             printed += 1

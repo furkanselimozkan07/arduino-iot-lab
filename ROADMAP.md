@@ -20,7 +20,7 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 - [ ] Bridge: serial -> MQTT command `iotlab-bridge`
 - [ ] Streamlit dashboard: live line charts from simulated source
 - [ ] Dashboard: read from CSV log / MQTT subscription
-- [ ] Alert rules (e.g. temp > threshold) with debounce
+- [x] Alert rules (e.g. temp > threshold) with debounce
 - [ ] Downlink commands to Arduino (LED/relay) with ack frames
 - [ ] Sketch: relay + LED actuator controlled by serial commands
 - [ ] Statistics summary (min/max/mean per window)
@@ -29,6 +29,7 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 - [ ] Docker compose: Mosquitto + bridge + dashboard
 
 ## Changelog
+- 2026-11-21: `iotlab.alerts` (`AlertRule`, `AlertEngine`, rule parser with `for N` debounce and `clear X` hysteresis), `iotlab-read --alert`, 14 tests.
 - 2026-11-20: `iotlab.mqtt` (`MqttConfig`, `MqttPublisher` with injectable client, JSON + per-key topics, retained status, lazy paho client), optional `mqtt` extra, 9 tests.
 - 2026-11-19: `iotlab.filters` (`MovingAverage`, `Ema`, `HampelFilter`, `ReadingFilter`), `iotlab-read --smooth/--ema/--reject-outliers`, 11 tests.
 - 2026-11-18: `iotlab.logger` (`CsvLogger` size-based rotation, resume, `read_log`/`read_logs`), `iotlab-read --log-dir/--log-prefix/--max-log-bytes`, 9 tests.
