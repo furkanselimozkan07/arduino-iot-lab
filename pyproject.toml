@@ -7,7 +7,7 @@ name = "arduino-iot-lab"
 version = "0.1.0"
 description = "Arduino sensor sketches plus Python host tools: serial parsing, MQTT, Streamlit dashboard"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = ["pyserial>=3.5"]
 
