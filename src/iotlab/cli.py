@@ -17,6 +17,7 @@ from .alerts import AlertEngine
 from .filters import Ema, HampelFilter, MovingAverage, ReadingFilter
 from .logger import CsvLogger
 from .parser import Reading
+from .stats import WindowAggregator
 from .serial_source import LineSource, SerialReader, SimulatedSerial
 
 FORMATS = ("table", "json", "csv")
@@ -57,6 +58,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--reject-outliers", action="store_true", help="replace spikes by the window median (Hampel filter)")
     p.add_argument("--alert", action="append", default=[], metavar="RULE",
                    help="alert rule such as 'temp_c>30 for 3 clear 28' (repeatable); events go to stderr")
+    p.add_argument("--stats", type=int, default=0, metavar="N",
+                   help="print min/max/mean/stdev per sensor every N readings (to stderr)")
+    p.add_argument("--stats-ms", type=int, default=0, metavar="MS",
+                   help="like --stats but windows of MS device milliseconds")
     return p
 
 
@@ -86,6 +91,14 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
     if args.smooth and args.ema:
         print("error: use either --smooth or --ema, not both", file=sys.stderr)
         return 2
+    if args.stats < 0 or args.stats_ms < 0 or (args.stats and args.stats_ms):
+        print("error: use one of --stats N or --stats-ms MS (both >= 0)", file=sys.stderr)
+        return 2
+    aggregator = None
+    if args.stats:
+        aggregator = WindowAggregator(count=args.stats)
+    elif args.stats_ms:
+        aggregator = WindowAggregator(span_ms=args.stats_ms)
     filters = build_filters(args)
     try:
         alerts = AlertEngine.from_strings(args.alert)
@@ -130,6 +143,10 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
             print(format_reading(reading, args.fmt, columns), file=out)
             for event in alerts.update(reading):
                 print(event, file=sys.stderr)
+            if aggregator:
+                summary = aggregator.add(reading)
+                if summary:
+                    print(summary.format(), file=sys.stderr)
             if logger:
                 logger.write(reading)
             printed += 1
@@ -138,6 +155,10 @@ def run(argv: Optional[Sequence[str]] = None, out: Optional[TextIO] = None,
     except KeyboardInterrupt:
         pass
     finally:
+        if aggregator:
+            tail = aggregator.flush()
+            if tail:
+                print(tail.format(), file=sys.stderr)
         if logger:
             logger.close()
     print(f"# {reader.good} valid, {reader.bad} corrupted lines", file=sys.stderr)

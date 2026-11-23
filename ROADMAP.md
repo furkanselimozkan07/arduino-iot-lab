@@ -23,12 +23,13 @@ Streamlit dashboard. Everything on the Python side must run without hardware.
 - [x] Alert rules (e.g. temp > threshold) with debounce
 - [ ] Downlink commands to Arduino (LED/relay) with ack frames
 - [ ] Sketch: relay + LED actuator controlled by serial commands
-- [ ] Statistics summary (min/max/mean per window)
-- [ ] GitHub Actions: pytest + arduino-cli compile check
+- [x] Statistics summary (min/max/mean per window)
+- [x] GitHub Actions: pytest (arduino-cli compile check still to do)
 - [ ] Docs: wiring diagrams and protocol specification
 - [ ] Docker compose: Mosquitto + bridge + dashboard
 
 ## Changelog
+- 2026-11-23: `iotlab.stats` (`summarize`, `WindowAggregator` count/time tumbling windows), `iotlab-read --stats/--stats-ms`, pytest CI workflow, 8 tests.
 - 2026-11-21: `iotlab.alerts` (`AlertRule`, `AlertEngine`, rule parser with `for N` debounce and `clear X` hysteresis), `iotlab-read --alert`, 14 tests.
 - 2026-11-20: `iotlab.mqtt` (`MqttConfig`, `MqttPublisher` with injectable client, JSON + per-key topics, retained status, lazy paho client), optional `mqtt` extra, 9 tests.
 - 2026-11-19: `iotlab.filters` (`MovingAverage`, `Ema`, `HampelFilter`, `ReadingFilter`), `iotlab-read --smooth/--ema/--reject-outliers`, 11 tests.

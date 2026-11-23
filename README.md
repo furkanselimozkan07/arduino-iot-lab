@@ -15,6 +15,7 @@ parsing, MQTT publishing and a Streamlit live dashboard (planned, see
 - `iotlab.filters` – streaming `MovingAverage`, `Ema` and `HampelFilter` (median/MAD outlier replacement), applied per sensor key with `ReadingFilter`.
 - `iotlab.MqttPublisher` – publishes readings as JSON (`iotlab/arduino/state`) and per-sensor topics, with retained `status` and an injectable client (fake in tests; `make_paho_client` for a real broker, `pip install .[mqtt]`).
 - `iotlab.alerts` – threshold rules with debounce (`for N`) and hysteresis (`clear X`), e.g. `temp_c>30 for 3 clear 28`; `iotlab-read --alert RULE` prints FIRING/RESOLVED events to stderr. Debounce idea follows the `for:` clause of [Prometheus alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/).
+- `iotlab.stats` – tumbling-window statistics (`WindowAggregator`, count- or time-based) giving min/max/mean/stdev per sensor; `iotlab-read --stats N` / `--stats-ms MS` print them to stderr.
 
 ## Install & test
 ```bash
@@ -29,6 +30,7 @@ iotlab-read --port /dev/ttyACM0 --format json   # real board
 iotlab-read --simulate --count 100 --log-dir logs --max-log-bytes 2000   # rotating CSV log
 iotlab-read --simulate --count 50 --reject-outliers --smooth 5   # despike, then average
 iotlab-read --simulate --alert 'temp_c>25 for 3 clear 24'   # debounced alert
+iotlab-read --simulate --count 30 --stats 10      # min/max/mean/sd per 10 readings
 ```
 
 ```python

@@ -5,6 +5,7 @@ from .logger import CsvLogger, read_log, read_logs
 from .alerts import AlertRule, AlertEngine, AlertEvent, parse_rule
 from .filters import MovingAverage, Ema, HampelFilter, ReadingFilter
 from .mqtt import MqttConfig, MqttPublisher, make_paho_client
+from .stats import Summary, WindowAggregator, WindowSummary, summarize
 from .serial_source import SerialReader, SimulatedSerial
 
 __all__ = [
@@ -27,6 +28,10 @@ __all__ = [
     "AlertEngine",
     "AlertEvent",
     "parse_rule",
+    "Summary",
+    "WindowAggregator",
+    "WindowSummary",
+    "summarize",
     "SerialReader",
     "SimulatedSerial",
 ]
